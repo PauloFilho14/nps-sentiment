@@ -1,0 +1,278 @@
+{
+  "name": "Analise_Sentimento_NPS_UniFECAF (Jan 28 at 13:48:52)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0",
+          "mode": "list",
+          "cachedResultName": "feedbacks_nps",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Entrada",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c667a558-0012-4cfd-a4e4-245370b3f0a7",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "xeehf1YIomNC8m8z",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9b77c3eb-da5b-430e-91d2-16fc3444290a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        256,
+        240
+      ],
+      "id": "ce99198c-9067-47ce-9f96-16e9392ac7ab"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um analista de experiência do aluno da UniFECAF.\n\nAnalise o feedback abaixo e retorne um JSON com:\n- sentimento: Positivo, Neutro ou Negativo\n- justificativa: explicação curta do motivo\n- acao_proxima: ação recomendada para a instituição\n\nRegras:\n- Se elogio claro → Positivo\n- Se crítica ou problema → Negativo\n- Se misto ou indiferente → Neutro\n\nFeedback:\n\"{{ $json.feedback }}\"\n\nResponda APENAS em JSON válido.\nAnalise o feedback abaixo e responda SOMENTE em JSON válido, sem texto extra.\n\nFormato obrigatório:\n{\n  \"sentimento\": \"positivo | neutro | negativo\",\n  \"justificativa\": \"string\",\n  \"acao_proxima\": \"string\"\n}\n\nFeedback:\n{{ $json.feedback }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -144
+      ],
+      "id": "739b5bbf-1748-461e-9ef8-7fb7123cd5fa",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2UQ4h0gHhBi67WiX",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"feedback\": \"{{ $('Google Sheets Trigger').item.json.feedback }}\",\n  \"sentimento\": \"{{ JSON.parse($json.content.parts[0].text).sentimento }}\",\n  \"justificativa\": \"{{ JSON.parse($json.content.parts[0].text).justificativa }}\",\n  \"acao_proxima\": \"{{ JSON.parse($json.content.parts[0].text).acao_proxima }}\"\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        -144
+      ],
+      "id": "a8a47501-3f0c-4feb-bdd8-cb30c3d6ec74",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0",
+          "mode": "list",
+          "cachedResultName": "feedbacks_nps",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 779583642,
+          "mode": "list",
+          "cachedResultName": "Saida",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1E1zgX9GMv5FmeF7I9Fn77w44aMnKEmx7H0Q7c-R57d0/edit#gid=779583642"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "feedback": "={{ $json.feedback }}",
+            "sentimento": "={{ $json.sentimento }}",
+            "justificativa": "={{ $json.justificativa }}",
+            "acao_proxima": "={{ $json.acao_proxima }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimento",
+              "displayName": "sentimento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "justificativa",
+              "displayName": "justificativa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "acao_proxima",
+              "displayName": "acao_proxima",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        -144
+      ],
+      "id": "f69e0357-49f3-4e8f-9366-4439ed7fc201",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4ZW2xUt98fTxOFKw",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "availableInMCP": false
+  },
+  "versionId": "fcd4e804-258e-41fb-aae2-4307a170ed29",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "26eb650b3d862eee985e26970b2aeda11d180e2b1c8db42818d48464611162d1"
+  },
+  "id": "q0A4T0FKXTp2BdgR",
+  "tags": []
+}
